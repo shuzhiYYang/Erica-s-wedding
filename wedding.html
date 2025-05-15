@@ -1,120 +1,299 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Happy Marriage</title>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
   <style>
     body {
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
       font-family: 'ZCOOL KuaiLe', cursive;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0;
       padding: 2rem;
+      color: #fadadd;
     }
-h1 {
-  font-family: 'Great Vibes', cursive;
-  color: #fbbcb8; /* dark red cf91b5 */
-  font-size: 3.2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  line-height: 1.4;
-  text-shadow: 1px 1px 3px white;
-}
-
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      color: #bb2649;
+      font-size: 3.2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      line-height: 1.4;
+      text-shadow: 1px 1px 3px white;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(7, 120px);
       grid-template-rows: repeat(6, 120px);
       gap: 4px;
+      width: max-content;
+      margin: 0 auto;
     }
     .grid div {
       width: 120px;
       height: 120px;
     }
     .photo {
-  background-size: cover;
-  background-position: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
-  
-  /* 添加渐变透明边缘效果 
-  -webkit-mask-image: radial-gradient(ellipse, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%);
-  mask-image: radial-gradient(ellipse, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat; */
-}
-.message p {
-      color: #fadadd;              /* Set text color to white */
-      font-family: "华文琥珀", "华文彩云", "STCaiyun", "Microsoft YaHei", "微软雅黑", sans-serif;  /* Use 行书 (Xingkai font) */
-      font-size: 1.2rem;         /* Adjust font size to your preference */
-      text-align: left;        /* Center align the text */
-      line-height: 1.6;          /* Adjust line spacing for readability */
-      margin-top: 2rem;          /* Add some space above the message */
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+    }
+    .message p {
+      font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+      font-size: 1.2rem;
+      text-align: left;
+      line-height: 1.6;
+      margin-top: 2rem;
+    }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      z-index: 0;
+    }
+    body > *:not(.overlay) {
+      position: relative;
+      z-index: 1;
+    }
+    #countdown-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      font-weight: bold;
+      z-index: 9999;
+    }
+    #countdown-text {
+      animation: scaleUp 1s ease-in-out infinite;
+    }
+    @keyframes scaleUp {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    #celebration-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      z-index: 9998;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .celebration-text {
+      position: absolute;
+      top: 20%;
+      font-size: 6rem;
+      color: #ed1c24; /*c21807*/
+      text-shadow: 2px 2px 5px black;
+      z-index: 2;
+      font-family: 'Great Vibes', cursive;
+    }
+    #fireworks-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #main-content {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-<!-- 🎵 Music Play Button -->
-  <button onclick="document.querySelector('audio').play()" style="margin-bottom: 1rem; font-size: 1rem;">
-    Click for 🎵
+  <!-- 🎵 背景音乐播放按钮 -->
+  <button id="play-music" style="margin-bottom: 1rem; font-size: 1rem;">
+    点击播放背景音乐 🎵
   </button>
 
-  <h1>Erica & Dana<br>Together since 2015 — Forever beyond 2025</h1>
+  <div class="overlay"></div>
 
-  <div class="grid" id="heart-grid"></div>
+  <div id="countdown-screen">
+    <div id="countdown-text">3</div>
+  </div>
 
-  <script>
-    const heartShape = [
-      "0100010",
-      "1110111",
-      "1111111",
-      "0111110",
-      "0011100",
-      "0001000"
-    ];
+  <div id="celebration-screen">
+    <canvas id="fireworks-canvas"></canvas>
+    <h1 class="celebration-text">Happy Marriage!</h1>
+    <!-- 祝福语音，自动播放 -->
+    <audio id="blessing-voice" src="blessing.m4a" preload="auto"></audio>
+  </div>
 
-    const container = document.getElementById('heart-grid');
-    let photoIndex = 1;
-    const maxPhotos = 100;
+  <div id="main-content">
+    <h1>Erica & Dana<br>Together since 2015 — Forever beyond 2025</h1>
 
-    for (let row = 0; row < heartShape.length; row++) {
-      for (let col = 0; col < heartShape[row].length; col++) {
-        const cell = document.createElement('div');
-        if (heartShape[row][col] === '1' && photoIndex <= maxPhotos) {
-          cell.classList.add('photo');
-          cell.style.backgroundImage = `url('photo${photoIndex}.jpg')`;
-          photoIndex++;
-        }
-        container.appendChild(cell);
-      }
-    }
-  </script>
- </div>
+    <div class="grid" id="heart-grid"></div>
 
-  <div class="message">
-    <p>
-      <br><br>我最爱的卡：<br><br>
-还记得高中的时候，有一年我的生日，你送了我一把很大的银色荧光伞，既结实又漂亮。贺卡上写着：希望有一天有人能够替我遮风挡雨。如今，那个能为你遮风挡雨的人，终于要与你携手踏上人生又一段崭新的旅程了，我由衷地为你感到高兴。<br><br>
+    <div class="message">
+      <p>
+        <!-- 你的祝福文字内容 -->
+        我最爱的卡：<br><br>
+        还记得高中的时候，有一年我的生日，你送了我一把很大的银色荧光伞，既结实又漂亮。贺卡上写着：希望有一天有人能够替我遮风挡雨。如今，那个能为你遮风挡雨的人，终于要与你携手踏上人生又一段崭新的旅程了，我由衷地为你感到高兴。<br><br>
 婚姻这条路，说长不长，说短不短。真正重要的，不是走了多久，而是一路上你们如何互相关心、彼此理解。我相信，你们会永远记得这份初衷，在日复一日的琐碎生活里也依旧守着那份最初的喜欢。<br><br>
 婚礼的意义，也许不在于白纱与鲜花，而在于从这一天起，你们真正成为彼此生命中最重要的人。从今往后，不论风雨，亦或晴天，我相信，你们一定会成为彼此温暖而坚定的依靠。等到你们白发苍苍，坐在摇椅上回望今天，一定会回忆起，这份至纯之情的珍贵。<br><br>
 最美好的缘分，不只是你们遇见了彼此，更是我们也能参与并见证这段真挚动人的旅程。我们一起经历了那么多美好的时光，玩闹、欢笑、彼此支持与陪伴。十年前的今天，我们或许从未想过会走到现在，更没想到彼此能一路陪伴至今，共同迎来这人生的新篇章。你们相爱的时间，也是我们彼此相识、相守的时间。对我来说，最大的幸运，就是能够陪伴你们从青春走向成熟，从恋爱走进婚姻。愿你们的新生活，继续书写细水长流的故事；而我们，也始终会是这些故事最忠实的读者和守候者。<br><br>
 愿爱情恒久甜蜜，愿前路温暖明亮；岁月静好，风景常新，幸福不止于此刻。<br><br>
 衷心祝你们新婚快乐，愿往后的每一天，都比昨天更幸福一点。<br><br>
-——最爱你的Ally
-    </p>
+——最爱你的Ally<br><br>
+二零二五年五月十七日留念
+      </p>
+    </div>
   </div>
 
-<!-- Background Music -->
-  <audio autoplay loop>
-    <source src="music.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
+  <!-- 背景音乐，初始不播放，由按钮控制 -->
+  <audio id="background-music" src="music.mp3" preload="auto" loop></audio>
+
+<script>
+  // 心形照片拼接
+  const heartShape = [
+    "0100010",
+    "1110111",
+    "1111111",
+    "0111110",
+    "0011100",
+    "0001000"
+  ];
+  const container = document.getElementById('heart-grid');
+  let photoIndex = 1;
+  const maxPhotos = 100;
+  for (let row = 0; row < heartShape.length; row++) {
+    for (let col = 0; col < heartShape[row].length; col++) {
+      const cell = document.createElement('div');
+      if (heartShape[row][col] === '1' && photoIndex <= maxPhotos) {
+        cell.classList.add('photo');
+        cell.style.backgroundImage = `url('photo${photoIndex}.jpg')`;
+        photoIndex++;
+      }
+      container.appendChild(cell);
+    }
+  }
+
+  const countdownScreen = document.getElementById('countdown-screen');
+  const countdownText = document.getElementById('countdown-text');
+  const celebrationScreen = document.getElementById('celebration-screen');
+  const blessingVoice = document.getElementById('blessing-voice');
+  const mainContent = document.getElementById('main-content');
+  const playMusicBtn = document.getElementById('play-music');
+  const backgroundMusic = document.getElementById('background-music');
+
+  let count = 3;
+
+  // 计时器倒数
+  const countdownInterval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      countdownText.textContent = count;
+    } else {
+      clearInterval(countdownInterval);
+      countdownScreen.style.display = 'none';
+      celebrationScreen.style.display = 'flex';
+
+      // 自动播放祝福语音（可能被浏览器阻止）
+      playBlessing();
+
+      launchFireworks();
+    }
+  }, 1000);
+
+  // 播放祝福语音函数，含自动播放失败处理
+  function playBlessing() {
+    blessingVoice.play().catch(() => {
+      alert('请点击页面以播放祝福语音');
+    });
+  }
+
+  // 祝福语音播放结束，切换到主内容
+  blessingVoice.addEventListener('ended', () => {
+    celebrationScreen.style.display = 'none';
+    mainContent.style.display = 'block';
+  });
+
+  // 背景音乐播放按钮事件
+  playMusicBtn.addEventListener('click', () => {
+    // 避免祝福语音和背景音乐重叠播放
+    if (!backgroundMusic.paused) {
+      backgroundMusic.pause();
+      playMusicBtn.textContent = '点击播放背景音乐 🎵';
+    } else {
+      blessingVoice.pause();
+      backgroundMusic.play();
+      playMusicBtn.textContent = '点击暂停背景音乐 ⏸️';
+    }
+  });
+
+  // 烟花动画
+  function launchFireworks() {
+    const canvas = document.getElementById('fireworks-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+
+    function randomColor() {
+      return `hsl(${Math.random() * 360}, 100%, 70%)`;
+    }
+
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        angle: Math.random() * 2 * Math.PI,
+        speed: Math.random() * 5 + 2,
+        radius: Math.random() * 2 + 1,
+        color: randomColor(),
+        alpha: 1
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        const dx = Math.cos(p.angle) * p.speed;
+        const dy = Math.sin(p.angle) * p.speed;
+        p.x += dx;
+        p.y += dy;
+        p.alpha -= 0.015;
+        if (p.alpha < 0) p.alpha = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+        // 这里 p.color 是字符串形式 hsl(x,100%,70%)
+        // 提取色调数字
+        const hueMatch = p.color.match(/\d+\.?\d*/);
+        const hue = hueMatch ? hueMatch[0] : 0;
+        ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
+        ctx.fill();
+      });
+
+      if (particles.some(p => p.alpha > 0)) {
+        requestAnimationFrame(animate);
+      }
+    }
+    animate();
+  }
+
+  // 点击页面也可尝试播放祝福语音（防止自动播放被阻止）
+  document.body.addEventListener('click', () => {
+    if (celebrationScreen.style.display === 'flex' && blessingVoice.paused) {
+      blessingVoice.play();
+    }
+  });
+</script>
+
 </body>
 </html>
